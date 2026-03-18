@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pro Store | Ultimate App Gallery</title>
+    <style>
+        :root {
+            --primary: #00f2ff;
+            --bg: #0a0b10;
+            --card: #161b22;
+            --text: #ffffff;
+        }
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(180deg, #1a1c23 0%, var(--bg) 100%);
+            border-bottom: 2px solid var(--primary);
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
+        }
+        .container {
+            max-width: 1200px;
+            width: 90%;
+            margin-top: 30px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .app-card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 1px solid #30363d;
+        }
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 20px var(--primary);
+            border-color: var(--primary);
+        }
+        .app-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 18px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        .download-btn {
+            display: inline-block;
+            background: var(--primary);
+            color: #000;
+            padding: 10px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .tag { font-size: 0.8rem; color: #8b949e; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>PRO STORE</h1>
+    <p>Premium Gaming & Pro Apps</p>
+</header>
+
+<div class="container">
+    <div id="appGrid" class="grid">
+        </div>
+</div>
+
+<script>
+    function loadApps() {
+        const grid = document.getElementById('appGrid');
+        const apps = JSON.parse(localStorage.getItem('proStoreApps')) || [];
+        
+        if(apps.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; width:100%;">No apps available yet. Visit Admin to add some!</p>';
+            return;
+        }
+
+        grid.innerHTML = apps.map(app => `
+            <div class="app-card">
+                <img src="${app.img}" class="app-icon" onerror="this.src='https://via.placeholder.com/80?text=App'">
+                <h3>${app.name}</h3>
+                <div class="tag">Pro Version Enabled</div>
+                <a href="${app.url}" target="_blank" class="download-btn">DOWNLOAD</a>
+            </div>
+        `).join('');
+    }
+
+    window.onload = loadApps;
+</script>
+
+</body>
+</html>
