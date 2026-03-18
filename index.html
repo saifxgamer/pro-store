@@ -3,108 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Store | Ultimate App Gallery</title>
+    <title>Pro Store | LIVE</title>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --primary: #00f2ff;
-            --bg: #0a0b10;
-            --card: #161b22;
-            --text: #ffffff;
-        }
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
+        :root { --primary: #00f2ff; --bg: #0a0b10; --card: #161b22; --text: #ffffff; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; text-align: center; }
+        
+        header { 
+            padding: 20px; 
+            border-bottom: 2px solid var(--primary); 
+            background: #1a1c23;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 10px;
         }
-        header {
-            width: 100%;
-            padding: 20px;
-            text-align: center;
-            background: linear-gradient(180deg, #1a1c23 0%, var(--bg) 100%);
-            border-bottom: 2px solid var(--primary);
-            box-shadow: 0 0 15px rgba(0, 242, 255, 0.3);
-        }
-        .container {
-            max-width: 1200px;
-            width: 90%;
-            margin-top: 30px;
-        }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .app-card {
-            background: var(--card);
-            border-radius: 15px;
-            padding: 15px;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border: 1px solid #30363d;
-        }
-        .app-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 20px var(--primary);
-            border-color: var(--primary);
-        }
-        .app-icon {
+
+        /* Logo Style */
+        .main-logo {
             width: 80px;
             height: 80px;
-            border-radius: 18px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 15px var(--primary);
             object-fit: cover;
-            margin-bottom: 15px;
         }
-        .download-btn {
-            display: inline-block;
-            background: var(--primary);
-            color: #000;
-            padding: 10px 25px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        .tag { font-size: 0.8rem; color: #8b949e; margin-bottom: 10px; }
+
+        header h1 { margin: 5px 0; letter-spacing: 2px; }
+        header p { margin: 0; color: var(--primary); font-size: 0.9rem; opacity: 0.8; }
+
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: auto; }
+        .app-card { background: var(--card); border-radius: 20px; padding: 20px; border: 1px solid #30363d; transition: 0.3s; }
+        .app-card:hover { border-color: var(--primary); transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0, 242, 255, 0.1); }
+        .app-icon { width: 80px; height: 80px; border-radius: 18px; margin-bottom: 15px; object-fit: cover; background: #0d1117; }
+        .download-btn { display: block; background: var(--primary); color: #000; padding: 12px; border-radius: 12px; text-decoration: none; font-weight: bold; margin-top: 15px; transition: 0.2s; }
+        .download-btn:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
 <header>
+    <img src="https://i.ibb.co.com/hRY0CDW2/1773859521488.png" alt="Pro Store Logo" class="main-logo">
     <h1>PRO STORE</h1>
-    <p>Premium Gaming & Pro Apps</p>
+    <p>Global App Distribution Center</p>
 </header>
 
-<div class="container">
-    <div id="appGrid" class="grid">
-        </div>
-</div>
+<div class="grid" id="appGrid">Loading Apps...</div>
 
 <script>
-    function loadApps() {
+    // আপনার Firebase Config এখানে বসান
+    const firebaseConfig = {
+        apiKey: "AIzaSyA8u1RLrkg1pdhIZrVqA6XIIUYG_vLQ8x0",
+  authDomain: "pro-store-d6de6.firebaseapp.com",
+  databaseURL: "https://pro-store-d6de6-default-rtdb.firebaseio.com",
+  projectId: "pro-store-d6de6",
+  storageBucket: "pro-store-d6de6.firebasestorage.app",
+  messagingSenderId: "473027499449",
+  appId: "1:473027499449:web:f37fe9334f00a640379268"
+};
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // ডাটাবেস থেকে অ্যাপ লিস্ট আনা
+    database.ref('apps').on('value', (snapshot) => {
+        const data = snapshot.val();
         const grid = document.getElementById('appGrid');
-        const apps = JSON.parse(localStorage.getItem('proStoreApps')) || [];
-        
-        if(apps.length === 0) {
-            grid.innerHTML = '<p style="text-align:center; width:100%;">No apps available yet. Visit Admin to add some!</p>';
-            return;
+        grid.innerHTML = "";
+
+        if (data) {
+            Object.keys(data).forEach(key => {
+                const app = data[key];
+                grid.innerHTML += `
+                    <div class="app-card">
+                        <img src="${app.img}" class="app-icon" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2589/2589174.png'">
+                        <h3 style="margin: 5px 0;">${app.name}</h3>
+                        <p style="font-size: 0.7rem; color: #8b949e; margin: 0;">PRO VERSION</p>
+                        <a href="${app.url}" class="download-btn" target="_blank">INSTALL</a>
+                    </div>
+                `;
+            });
+        } else {
+            grid.innerHTML = "<p style='grid-column: 1/-1;'>No apps found in the database.</p>";
         }
-
-        grid.innerHTML = apps.map(app => `
-            <div class="app-card">
-                <img src="${app.img}" class="app-icon" onerror="this.src='https://via.placeholder.com/80?text=App'">
-                <h3>${app.name}</h3>
-                <div class="tag">Pro Version Enabled</div>
-                <a href="${app.url}" target="_blank" class="download-btn">DOWNLOAD</a>
-            </div>
-        `).join('');
-    }
-
-    window.onload = loadApps;
+    });
 </script>
-
 </body>
 </html>
